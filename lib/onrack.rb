@@ -65,7 +65,7 @@ Router.load do |routes|
   routes.add "get", "/gs", "pages#garden_state"
 end
 
-class Racker
+class OnRack
   def response(env)
     request = Rack::Request.new(env)
     response = Rack::Response.new
@@ -75,10 +75,10 @@ class Racker
   end
 end
 
-class RackerApp
+class OnRackApp
   def self.call(env)
-    Racker.new.response(env)
+    OnRack.new.response(env)
   end
 end
 
-Rack::Server.start app: RackerApp
+Rack::Server.start app: OnRackApp
