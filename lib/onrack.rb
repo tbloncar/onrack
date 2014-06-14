@@ -1,7 +1,8 @@
-require "rack"
-require "rack/server"
 project_root = File.dirname(File.absolute_path(__FILE__))
 Dir.glob(project_root + "/controllers/*", &method(:require))
+
+require "rack"
+require "rack/server"
 require_relative "router"
 require_relative "routes"
 

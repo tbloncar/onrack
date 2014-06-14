@@ -4,7 +4,7 @@ class PagesController < AppController
   end
 
   def about
-    provide "About us!", status: 200
+    provide "About us!"
   end
 end
 
