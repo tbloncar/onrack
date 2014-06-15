@@ -12,7 +12,7 @@ class Router
   end
 
   def route(request, response)
-    if mapping = find_mapping_and_decorate(request)
+    if mapping = map_and_parameterize(request)
       map_and_invoke_respond(mapping, request, response)
     else
       respond_to_absent_mapping(response)
@@ -26,38 +26,55 @@ class Router
     end
   end
 
+  class PathToRegexpStr
+    attr_reader :path
+    attr_accessor :regexp_str
+
+    def initialize(path)
+      @path = path
+      @regexp_str = ""
+      transform!
+    end
+
+    private
+
+    def transform!
+      rs = path.gsub(/:[^\/]*/, "[^\\/]*")
+      rs.gsub!(/\w\//) { |match| match.gsub!("/", "\\/") }
+      rs.gsub!(/\A\//, "\\/")
+      rs.insert(0, "\\A").insert(-1, "\\z")
+      @regexp_str = rs
+    end
+  end
+
   private
 
-  def find_mapping_and_decorate(request)
+  def map_and_parameterize(request)
     rkey = "#{request.request_method.downcase}##{request.path}"
-    return m if m = Router::routes[rkey] 
+    if mapping = Router::routes[rkey] 
+      return mapping
+    end
 
     Router::routes.keys.each { |k|
-      path = k.split("#")[1]
-     
-      regexp_str = path.gsub(/:[^\/]*/, "[^\\/]*")
-      regexp_str.gsub!(/\w\//) { |match|
-        match.gsub!("/", "\\/") 
-      }
-      regexp_str.gsub!(/\A\//, "\\/")
-      regexp_str.insert(0, "\\A")
-      regexp_str.insert(-1, "\\z")
-
+      segmented_path = k.split("#")[1]
+      regexp_str = PathToRegexpStr.new(segmented_path).regexp_str
+      
       if Regexp.new(regexp_str).match(request.path)
-        rkey = "#{request.request_method.downcase}##{path}"
-
-        request_path_segments = request.path.split("/")
-        path.split("/").each_with_index { |segment, i|
-          if /:.*/.match(segment)
-            request[segment[1..-1]] = request_path_segments[i]     
-          end
-        }
-
+        rkey = "#{request.request_method.downcase}##{segmented_path}"
+        convert_dynamic_route_segments_to_params(request, segmented_path)
         return Router::routes[rkey]
       end
     }
+    return false
+  end
 
-    return nil
+  def convert_dynamic_route_segments_to_params(request, segmented_path)
+    request_path_segments = request.path.split("/")
+    segmented_path.split("/").each_with_index { |segment, i|
+      if /:.*/.match(segment)
+        request[segment[1..-1]] = request_path_segments[i]     
+      end
+    }
   end
 
   def map_and_invoke_respond(mapping, request, response)

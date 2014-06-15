@@ -1,6 +1,6 @@
 class PagesController < AppController
   def index
-    provide "You gotta hear this one song. It'll change your life, I swear."
+    render({ 'greeting' => "Hello, world!" }, status: 200)
   end
 
   def about
