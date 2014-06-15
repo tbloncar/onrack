@@ -29,12 +29,12 @@ class AppController
     private
 
     def layout_content
-      layout_path = "#{ROOT}/views/layouts/layout.liquid"
+      layout_path = "#{ROOTDIR}/app/views/layouts/layout.liquid"
       File.open(layout_path, "r").read
     end
 
     def view_content
-      view_path = "#{ROOT}/views/#{dirname}/#{viewname}.liquid"
+      view_path = "#{ROOTDIR}/app/views/#{dirname}/#{viewname}.liquid"
       File.open(view_path, "r").read
     end
   end
@@ -48,10 +48,5 @@ class AppController
 
     response.write(view)
     response.status = status
-  end
-
-  def layout
-    layout_path = "#{ROOT}/views/layouts/layout.liquid"
-    File.open(layout_path, "r").read
   end
 end

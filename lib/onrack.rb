@@ -1,11 +1,12 @@
-ROOT = File.dirname(File.absolute_path(__FILE__))
-Dir.glob(ROOT + "/controllers/*", &method(:require))
-
 require "rack"
 require "rack/server"
 require "liquid"
-require_relative "router"
-require_relative "routes"
+
+ROOTDIR = Dir.pwd
+Dir.glob(ROOTDIR + "/lib/*.rb", &method(:require))
+Dir.glob(ROOTDIR + "/lib/**/*.rb", &method(:require))
+Dir.glob(ROOTDIR + "/app/*.rb", &method(:require))
+Dir.glob(ROOTDIR + "/app/**/*.rb", &method(:require))
 
 class OnRackApp
   def process_and_respond(env)
@@ -22,5 +23,3 @@ class OnRack
     OnRackApp.new.process_and_respond(env)
   end
 end
-
-Rack::Server.start app: OnRack
